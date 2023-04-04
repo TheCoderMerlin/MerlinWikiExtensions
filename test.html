@@ -1,0 +1,101 @@
+<!--
+******************************************************************************************************
+  MerlinWikiExtensions Extends the functionality of the wiki by adding
+  extensions for Merlin-specific capabilities.
+  Copyright (C) 2023 CoderMerlin.Academy
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  *******************************************************************************************************
+-->  
+
+<html>
+  <head>
+    <link rel="stylesheet" href="merlin.css" />
+    <script type="module">
+      import * as merlinapi from "./api.js";
+
+      
+      function MasteryProgressModel(data) {
+	  this.masteryProgresses = ko.observableArray(data);
+      }
+
+
+      // Activates knockout.js
+      function init(event) {
+	  const urlParams = new URLSearchParams(window.location.search);
+	  const userName = urlParams.get('userName');
+	  const sessionID = urlParams.get('sessionID');
+	  document.getElementById("userName").value = userName;
+	  document.getElementById("sessionID").value = sessionID;
+	  
+	  let successHandler = function (data) {
+	      data.sort((left, right) => {
+		  return left.masteryProgramTopicSequence > right.masteryProgramTopicSequence ? 1 :
+		      (left.masteryProgramTopicSequence < right.masteryProgramTopicSequence ? -1 :
+		       0)
+	      });
+	      let model = new MasteryProgressModel(data);
+	      ko.applyBindings(model);
+	  }
+	  let errorHandler = function(error) {
+	      console.error(error.message);
+	  }
+	  merlinapi.MasteryProgressModel.load(successHandler, errorHandler, userName, sessionID);
+      }
+      
+      window.addEventListener("load", (event) => {
+	  init(event)
+      });
+    </script>
+  </head>
+
+  <body>
+    <h2>User Mastery Progress</h2>
+    <form action="" method="get">
+      <label for="userName">First name:</label><br>
+      <input type="text" id="userName" name="userName"/><br>
+      <label for="sessionID">Session ID:</label><br>
+      <input type="text" id="sessionID" name="sessionID"/><br>
+      <input type="submit" value="Submit"/>
+    </form>
+    <table class="merlin-proficiency-progress-table" style="display: none" data-bind="visible: true">
+      <thead>
+	<tr>
+	  <th>Program Level Name</th>
+	  <th>Emerging</th>
+	  <th>Developing</th>
+	  <th>Proficient</th>
+	  <th>Exemplary</th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: masteryProgresses">
+        <tr>
+	  <td data-bind="style: {'background-color': color()}, click: toggleMissionDisplay" class="merlin-proficiency-progress-program-level-name">
+	    <span data-bind="text: arrowInnerText()"></span>
+	    <span data-bind="text: standardName()"></span>
+            <ul data-bind="style: {'display': (shouldShowMissions()) ? 'block' : 'none'},foreach: missions">
+	      <li data-bind="text: standardName()"></li>
+            </ul>
+	  </td>
+          <td><span data-bind="class: emergingClassName()"></span></td>
+          <td><span data-bind="class: developingClassName()"></span></td>
+          <td><span data-bind="class: proficientClassName()"></span></td>
+          <td><span data-bind="class: exemplaryClassName()"></span></td>
+        </tr>
+      </tbody>
+    </table>
+  <body/>
+
+</html>
+
+
+
+                          

@@ -1,0 +1,102 @@
+/******************************************************************************************************
+  MerlinWikiExtensions Extends the functionality of the wiki by adding
+  extensions for Merlin-specific capabilities.
+  Copyright (C) 2023 CoderMerlin.Academy
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*******************************************************************************************************/
+
+/* Proficiency Progress Table */
+
+.merlin-proficiency-progress-table {
+    border: 1px solid;
+    border-collapse: collapse;
+}
+
+.merlin-proficiency-progress-table th {
+    border: 1px solid;
+}
+
+.merlin-proficiency-progress-table td {
+    border: 1px solid;
+    min-width: 200px;
+}
+
+.merlin-proficiency-progress-program-level-name {
+    cursor: pointer;
+}
+
+
+.merlin-proficiency-progress-table td:nth-child(3) span{
+    animation-delay: 0.8s;
+}
+
+.merlin-proficiency-progress-table td:nth-child(4) span{
+    animation-delay: 1.6s;
+}
+
+.merlin-proficiency-progress-table td:nth-child(5) span{
+    animation-delay: 2.4s;
+}
+
+.merlin-proficiency-progress-none {
+    width: 200px;
+    height: 2em;
+    display: block;
+    background-color: gray;
+}
+
+.merlin-proficiency-progress-partial:before {
+    content: "\2794";
+    color: blue;
+}
+
+.merlin-proficiency-progress-partial {
+    width: 200px;
+    display: block;
+    font-size: 2em;
+    opacity: 0;
+    animation: merlin-proficiency-progress-animation-partial 1s infinite;
+}
+
+@keyframes merlin-proficiency-progress-animation-partial {
+    0% {
+	opacity: 0;
+	transform: translate(10%, 0px);
+    }
+    50% {
+	opacity: 1;
+    }
+    100% {
+	opacity: 0;
+	transform: translate(80%, 0px);
+    }
+}
+
+.merlin-proficiency-progress-complete {
+    width: 0px;
+    height: 2em;
+    display: block;
+    background-color: lightgreen;
+    animation: merlin-proficiency-progress-animation-complete 1s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes merlin-proficiency-progress-animation-complete {
+    0% {
+	opacity: 0;
+	width: 0px;
+    }
+    100% {
+	opacity: 1;
+	width: 200px;
+    }
+}
