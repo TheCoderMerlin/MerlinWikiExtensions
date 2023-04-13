@@ -17,6 +17,18 @@ import * as jquery from "https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jque
 import * as knockout from "./knockout-min.js";
 
 /******************************************************************************************************
+ * Global cache
+ ******************************************************************************************************/
+let cachedAuthenticatedUsername = undefined;
+let cachedAuthenticatedSessionID = undefined;
+
+export function setCredentials(authenticatedUsername, authenticatedSessionID) {
+    cachedAuthenticatedUsername = authenticatedUsername;
+    cachedAuthenticatedSessionID = authenticatedSessionID;
+}
+
+
+/******************************************************************************************************
  * Errors
  ******************************************************************************************************/
 export class MerlinError {
@@ -55,9 +67,11 @@ export function languageServerURL() {
  * API Server URL (based on subdomain)
  ******************************************************************************************************/
 export function apiServerURL() {
-    const url = (subdomain() == "stg") ?
-	  "https://api-server-stg.codermerlin.academy/" :
-	  "https://api-server.codermerlin.academy/";
+    // const url = (subdomain() == "stg") ?
+    // 	  "https://api-server-stg.codermerlin.academy/" :
+    // 	  "https://api-server.codermerlin.academy/";
+    console.warn("URL OVERRIDE!!!");
+    const url = "https://stg.codermerlin.academy/vapor/david-ben-yaakov/";
     return url;
 }
 
@@ -106,12 +120,77 @@ export function consoleToHTML(consoleText) {
 * Most APIs have the first four parameters as:
 * successHandler(data)
 * errorHandler(merlinAjaxError)
-* username
-* sessionID
+* authorizedUsername
+* authorizedSessionID
 *
 * Exceptions may occur if authentication is not required
 ******************************************************************************************************
 ******************************************************************************************************/
+
+/*----------------------------------------------------------------------------------------------------
+ * UserModel
+ *----------------------------------------------------------------------------------------------------*/
+export class UserModel {
+    static from(json) {
+	let model = new UserModel();
+	model.id = json.id;
+	model.userName = json.userName;
+	model.firstName = json.firstName;
+	model.lastName = json.lastName;
+	model.externalId = json.externalId;
+	model.contactId = json.contactId;
+	return model;
+    }
+
+    static loadUsersInGroupUnderAuthority(successHandler, errorHandler,
+					  groupPathnameAuthority,
+					  userName, groupName) {
+	const url = `${apiServerURL()}/v1/groups/underAuthority/${userName}/${groupName}/users`;
+	// Response is array of user models
+	// {
+	//     "userName": "grant-burbin",
+	//     "emailAddress": "grant.burbin@school.org",
+	//     "externalId": "X254899",
+	//     "lastName": "Burbin",
+	//     "contactId": 585,
+	//     "firstName": "Grant",
+	//     "id": 597
+	// }
+	let headers = {
+		"username": cachedAuthenticatedUsername,
+		"sessionID": cachedAuthenticatedSessionID
+	}
+	if (typeof groupPathnameAuthority !== "undefined") {
+	    headers.groupPathnameAuthority = groupPathnameAuthority;
+
+	}
+	let response = $.ajax({
+	    type: "GET",
+	    url,
+	    headers: headers,
+	    dataType: "json",
+	    error: function(xmlhttprequest) {
+		let error = new MerlinAjaxError(xmlhttprequest, url);
+		errorHandler(error);
+	    },
+	    success: function(data) {
+		let models = [];
+		data.forEach(element => models.push(UserModel.from(element)));
+		models.sort((left, right) => {
+		    return left.lastName > right.lastName ? 1 :
+			(left.lastName < right.lastName ? -1 :
+			 0)
+		});
+		successHandler(models);
+	    },
+	    timeout: 25000 
+	});
+    }
+}
+
+/*----------------------------------------------------------------------------------------------------
+ * MissionModel
+ *----------------------------------------------------------------------------------------------------*/
 export class MissionModel {
     static from(json){
 	let model = new MissionModel();
@@ -119,11 +198,11 @@ export class MissionModel {
 	model.name = json.name;
 	model.sequence = json.sequence;
 	model.suffix = json.suffix;
-	return model
+	return model;
     }
 
-    static load(handle, successHandler, errorHandler,
-		masteryProgramID, topicID) {
+    static loadMasteryProgramTopic(handle, successHandler, errorHandler,
+				   masteryProgramID, topicID) {
 	const url = `${apiServerURL()}/v1/mission-manager/mastery-programs/${masteryProgramID}/topics/${topicID}/missions`;
 	// Response is array of missions
 	// {
@@ -155,6 +234,9 @@ export class MissionModel {
 }
 
 
+/*----------------------------------------------------------------------------------------------------
+ * MasteryProgressModel
+ *----------------------------------------------------------------------------------------------------*/
 export class MasteryProgressModel {
     static from(json) {
 	let model = new MasteryProgressModel();
@@ -187,8 +269,12 @@ export class MasteryProgressModel {
 	return model;
     }
 
-    static load(successHandler, errorHandler, username, sessionID) {
-	const url = `${apiServerURL()}/v1/mission-manager/users/${username}/mastery-progress/programs`;
+    static loadForUser(successHandler, errorHandler,
+		       groupPathnameAuthority,
+		       username) {
+	const finalUsername =  (typeof username !== "undefined") ? username : cachedAuthenticatedUsername;
+	const url = `${apiServerURL()}/v1/mission-manager/users/${finalUsername}/mastery-progress/programs`;
+	console.log(url);
 	// Response is array of progress
 	// {
 	// 	  "id": "2",   // masteryProgramTopicId
@@ -209,13 +295,18 @@ export class MasteryProgressModel {
 	// 	  "proficientMinimumPoints": 120,
 	// 	  "exemplaryMinimumPoints": 135,
 	// }
+	let headers = {
+		"username": cachedAuthenticatedUsername,
+		"sessionID": cachedAuthenticatedSessionID
+	}
+	if (typeof groupPathnameAuthority !== "undefined") {
+	    headers.groupPathnameAuthority = groupPathnameAuthority;
+
+	}
 	let response = $.ajax({
 	    type: "GET",
 	    url,
-	    headers: {
-		"username": username,
-		"sessionID": sessionID
-	    },
+	    headers: headers,
 	    dataType: "json",
 	    error: function(xmlhttprequest) {
 		let error = new MerlinAjaxError(xmlhttprequest, url);
@@ -224,6 +315,11 @@ export class MasteryProgressModel {
 	    success: function(data) {
 		let models = [];
 		data.forEach(element => models.push(MasteryProgressModel.from(element)));
+		models.sort((left, right) => {
+		    return left.masteryProgramTopicSequence > right.masteryProgramTopicSequence ? 1 :
+			(left.masteryProgramTopicSequence < right.masteryProgramTopicSequence ? -1 :
+			 0)
+		});
 		successHandler(models);
 	    },
 	    timeout: 25000 
@@ -310,12 +406,82 @@ export class MasteryProgressModel {
 
 	// Load missions if they haven't yet been loaded
 	if (this.missions().length == 0) {
-	    MissionModel.load(this, successHandler, errorHandler, this.masteryProgramId, this.id);
+	    MissionModel.loadMasteryProgramTopic(this, successHandler, errorHandler, this.masteryProgramId, this.id);
 	}
     }
 
 }
 
+
+/*----------------------------------------------------------------------------------------------------
+ * GroupModel
+ *----------------------------------------------------------------------------------------------------*/
+export class GroupModel {
+    static from(json) {
+	let model = new GroupModel();
+
+	// Read from json
+	model.id = json.id;
+	model.parentId = json.parentId;
+	model.name = json.name;
+	model.pathname = json.pathname;
+
+	model.children = [];
+	json.children.forEach(element => model.children.push(GroupModel.from(element)));
+
+	// Read upon demand using set credentials
+	model.users = ko.observableArray([]);
+
+	return model;
+    }
+
+    static loadGroupsUnderAuthority(successHandler, errorHandler, privilegeName) {
+	const url = `${apiServerURL()}/v1/groups/underAuthority/${cachedAuthenticatedUsername}?forPrivilegeName=${privilegeName}`;
+	// Response is array of groups
+	// {
+	//       "pathname": "2022-ahs/student/cs-i/dby",
+        //       "name": "dby",
+	//       "parentId": 40,
+	//       "id": 43,
+	//       "children": []
+	// }
+	let response = $.ajax({
+	    type: "GET",
+	    url,
+	    headers: {
+		"username": cachedAuthenticatedUsername,
+		"sessionID": cachedAuthenticatedSessionID
+	    },
+	    dataType: "json",
+	    error: function(xmlhttprequest) {
+		let error = new MerlinAjaxError(xmlhttprequest, url);
+		errorHandler(error);
+	    },
+	    success: function(data) {
+		let models = [];
+		data.forEach(element => models.push(GroupModel.from(element)));
+		successHandler(models);
+	    },
+	    timeout: 25000
+	});
+    }
+
+    loadUsersInGroup() {
+	let successHandler = data => {
+	    let models = [];
+	    data.forEach(element => models.push(UserModel.from(element)));
+	    this.users(models);
+	}
+	let errorHandler = error => {
+	    console.error(error.message);
+	}
+	UserModel.loadUsersInGroupUnderAuthority(successHandler, errorHandler,
+						 cachedAuthenticatedUsername, cachedAuthenticatedSessionID, this.pathname,
+						 cachedAuthenticatedUsername, this.pathname);
+
+    }
+
+}
 
 export function intialize() {
 }

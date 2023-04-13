@@ -20,53 +20,87 @@
   <head>
     <link rel="stylesheet" href="merlin.css" />
     <script type="module">
-      import * as merlinapi from "./merlin-api.mjs";
-
+      import * as merlinProficiencyProgress from "./merlin-proficiency-progress.js";
       
-      function MasteryProgressModel(data) {
-	  this.masteryProgresses = ko.observableArray(data);
-      }
+      const urlParams = new URLSearchParams(window.location.search);
+      const authenticatedUsername = urlParams.get('authenticatedUsernameInput');
+      const authenticatedSessionID = urlParams.get('authenticatedSessionIDInput');
+      document.getElementById("authenticatedUsernameInput").value = authenticatedUsername;
+      document.getElementById("authenticatedSessionIDInput").value = authenticatedSessionID;
 
+      // Install handlers for document
+      document.merlinHandlersLoadMasteryProgress = function(node)  {
+	  // Arguments are located within the specified node as follows
+	  // <span class="merlin-arguments">
+          //    <span data-bind="text: userName"></span>
+          // </span>
+	  let userName = $(node.getElementsByClassName("merlin-arguments")[0]).children("span[data-bind='text: userName']")[0].textContent
+	  let groupUnderAuthority = $(node.getElementsByClassName("merlin-arguments")[0]).children("span[data-bind='text: $parent.pathname']")[0].textContent
 
-      // Activates knockout.js
-      function init(event) {
-	  const urlParams = new URLSearchParams(window.location.search);
-	  const userName = urlParams.get('userName');
-	  const sessionID = urlParams.get('sessionID');
-	  document.getElementById("userName").value = userName;
-	  document.getElementById("sessionID").value = sessionID;
-	  
-	  let successHandler = function (data) {
-	      data.sort((left, right) => {
-		  return left.masteryProgramTopicSequence > right.masteryProgramTopicSequence ? 1 :
-		      (left.masteryProgramTopicSequence < right.masteryProgramTopicSequence ? -1 :
-		       0)
-	      });
-	      let model = new MasteryProgressModel(data);
-	      ko.applyBindings(model);
-	  }
-	  let errorHandler = function(error) {
-	      console.error(error.message);
-	  }
-	  merlinapi.MasteryProgressModel.load(successHandler, errorHandler, userName, sessionID);
+	  console.log("Requesting loading...")
+          merlinProficiencyProgress.loadMasteryProgress(userName, groupUnderAuthority);
       }
       
       window.addEventListener("load", (event) => {
-	  init(event)
+	  merlinProficiencyProgress.setCredentials(authenticatedUsername, authenticatedSessionID);
+	  
+	  merlinProficiencyProgress.loadGroupsUnderAuthority();
+	  merlinProficiencyProgress.loadMasteryProgress(authenticatedUsername, undefined);
+	  
       });
     </script>
   </head>
 
   <body>
-    <h2>User Mastery Progress</h2>
+    <h2>Test Form</h2>
     <form action="" method="get">
-      <label for="userName">First name:</label><br>
-      <input type="text" id="userName" name="userName"/><br>
-      <label for="sessionID">Session ID:</label><br>
-      <input type="text" id="sessionID" name="sessionID"/><br>
+      <label for="authenticatedUsernameInput">Authenticated username:</label><br>
+      <input type="text" id="authenticatedUsernameInput" name="authenticatedUsernameInput"/><br>
+      <label for="authenticatedSessionIDInput">Session ID:</label><br>
+      <input type="text" id="authenticatedSessionIDInput" name="authenticatedSessionIDInput"/><br>
       <input type="submit" value="Submit"/>
     </form>
-    <table class="merlin-proficiency-progress-table" style="display: none" data-bind="visible: true">
+
+    <div id="merlin-proficiency-progress-wrapper">
+      <div id="merlin-proficiency-progress-group-selector-container">
+	<div id="merlin-proficiency-progress-group-selector">
+	  <h2>Groups Under My Authority</h2>
+	  <ul class="merlin-groups-tree" data-bind="template: {name: 'groupTemplate', foreach: groups}" id='merlin-groups-under-authority-tree'></ul>
+	  <script id="groupTemplate" type="text/html">
+              <!--ko if: children.length > 0-->
+                  <li>
+                      <details> 
+                          <summary><span data-bind="text: pathname"></span></summary>
+                          <ul data-bind="template: {name: 'groupTemplate', foreach: children}"></ul>
+                      </details>
+                  </li>
+              <!--/ko-->
+              <!--ko if: children.length == 0-->
+                  <li>
+                      <a href="javascript:;"><span class="merlin-groups-tree-group-leaf" data-bind="text: pathname, click: loadUsersInGroup;"></span></a>
+                      <ul data-bind="foreach: users">
+                          <li>
+                                  <a href="javascript:;" onClick="document.merlinHandlersLoadMasteryProgress(this);">
+                                  <span class="merlin-arguments">
+                                      <span data-bind="text: userName"></span>
+                                      <span data-bind="text: $parent.pathname"></span>
+                                  </span>
+                                  <span  class="merlin-groups-tree-user-leaf">
+                                      <span data-bind="text: firstName"></span><span>&nbsp;</span><span data-bind="text: lastName"></span>
+                                  </span>
+                              </a>
+                          </li>
+                      </ul>
+                  </li>
+              <!--/ko-->
+	  </script>
+	</div>
+      </div>
+
+      <div id="merlin-proficiency-progress-table-container">
+	<div id="merlin-proficiency-progress-table-div">
+    <h2 id="merlin-proficiency-progress-header">User Mastery Progress&nbsp;(<span data-bind="text: username"></span>)</h2>
+    <table id='merlin-proficiency-progress-table' class="merlin-proficiency-progress-table" style="display: none" data-bind="visible: true">
       <thead>
 	<tr>
 	  <th>Program Level Name</th>
@@ -92,6 +126,10 @@
         </tr>
       </tbody>
     </table>
+    </div>
+    </div>
+    </div>
+    
   <body/>
 
 </html>

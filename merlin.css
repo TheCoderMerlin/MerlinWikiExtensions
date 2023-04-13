@@ -14,7 +14,144 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *******************************************************************************************************/
 
-/* Proficiency Progress Table */
+/*****************************************************************************************************
+ * Arguments
+ *****************************************************************************************************/
+.merlin-arguments {
+    display: none;
+}
+
+/*****************************************************************************************************
+ * Group Tree
+ * Credits:
+ * https://iamkate.com/code/tree-views/
+ *****************************************************************************************************/
+.merlin-groups-tree{
+    --spacing : 1.5rem;
+    --radius  : 8px;
+}
+
+.merlin-groups-tree li{
+    display      : block;
+    position     : relative;
+    padding-left : calc(2 * var(--spacing) - var(--radius) - 2px);
+}
+
+.merlin-groups-tree ul{
+    margin-left  : calc(var(--radius) - var(--spacing));
+    padding-left : 0;
+}
+
+.merlin-groups-tree ul li{
+    border-left : 2px solid #ddd;
+}
+
+.merlin-groups-tree ul li:last-child{
+    border-color : transparent;
+}
+
+.merlin-groups-tree ul li::before{
+    content      : '';
+    display      : block;
+    position     : absolute;
+    top          : calc(var(--spacing) / -2);
+    left         : -2px;
+    width        : calc(var(--spacing) + 2px);
+    height       : calc(var(--spacing) + 1px);
+    border       : solid #ddd;
+    border-width : 0 0 2px 2px;
+}
+
+.merlin-groups-tree summary{
+    display : block;
+    cursor  : pointer;
+}
+
+.merlin-groups-tree summary::marker,
+.merlin-groups-tree summary::-webkit-details-marker{
+    display : none;
+}
+
+.merlin-groups-tree summary:focus{
+    outline : none;
+}
+
+.merlin-groups-tree summary:focus-visible{
+    outline : 1px dotted #000;
+}
+
+.merlin-groups-tree li::after,
+.merlin-groups-tree summary::before{
+    content       : '';
+    display       : block;
+    position      : absolute;
+    top           : calc(var(--spacing) / 2 - var(--radius));
+    left          : calc(var(--spacing) - var(--radius) - 1px);
+    width         : calc(2 * var(--radius));
+    height        : calc(2 * var(--radius));
+    border-radius : 50%;
+    background    : #ddd;
+}
+
+.merlin-groups-tree summary::before{
+    content     : '+';
+    z-index     : 1;
+    background  : #4f3f8a;
+    color       : #fff;
+    line-height : calc(2 * var(--radius) - 2px);
+    text-align  : center;
+}
+
+.merlin-groups-tree details[open] > summary::before{
+    content : '-';
+}
+
+.merlin-groups-tree-group-leaf {
+    color: darkblue;
+}
+
+a:has(.merlin-groups-tree-group-leaf) {
+    text-decoration: none;
+}
+
+.merlin-groups-tree-user-leaf {
+    color: darkgreen;
+    cursor: pointer;
+}
+
+a:has(.merlin-groups-tree-user-leaf) {
+    text-decoration: none;
+}
+
+/*****************************************************************************************************
+ * Proficiency Progress Wrapper
+ *****************************************************************************************************/
+#merlin-proficiency-progress-wrapper {
+    display: flex;
+    width: 100%;
+    max-height: 60vw;
+}
+
+#merlin-proficiency-progress-group-selector-container  {
+    margin-right: 1rem;
+    width: 30%;
+    overflow-y: scroll;
+}
+
+#merlin-proficiency-progress-group-selector {
+}
+
+#merlin-proficiency-progress-table-container {
+    overflow-y: scroll;
+}
+
+#merlin-proficiency-progress-table-div {
+}
+
+
+/*****************************************************************************************************
+ * Proficiency Progress Table
+ *****************************************************************************************************/
 
 .merlin-proficiency-progress-table {
     border: 1px solid;
