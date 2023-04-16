@@ -21,6 +21,76 @@
     display: none;
 }
 
+
+/*****************************************************************************************************
+ * Effects
+ *****************************************************************************************************/
+.merlin-shimmer-effect {
+    mask: linear-gradient(-60deg,#000 30%,#0005,#000 70%) right/350% 100%;
+    background-repeat: no-repeat;
+    animation: merlin-shimmer 1.0s infinite;
+}
+
+@keyframes merlin-shimmer {
+    100% {mask-position: left}
+}
+
+.merlin-spin-effect {
+    animation-name: merlin-spin;
+    animation-duration: 5000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes merlin-spin {
+    from {
+	transform:rotate(0deg);
+    }
+    to {
+	transform:rotate(360deg);
+    }
+}
+
+.merlin-pulse-effect {
+    animation-name: merlin-pulse;
+    animation-duration: 1000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes merlin-pulse {
+    0% {
+	transform: scale(1.00);
+    }
+    50% {
+	transform: scale(0.50);
+    }
+    100% {
+	transform: scale(1.00);
+    }
+}
+
+/*****************************************************************************************************
+ * API Status Header
+ *****************************************************************************************************/
+.merlin-interactive-api-group {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    gap: 2px;
+}
+
+.merlin-interactive-api-group > * {
+}
+
+.merlin-interactive-api-status-header {
+    grid-column: 1 / span 2;
+    width: 100%;
+    height: 30px;
+    background-color: purple;
+    border: 1px;
+}
+
+
 /*****************************************************************************************************
  * Group Tree
  * Credits:
@@ -126,26 +196,25 @@ a:has(.merlin-groups-tree-user-leaf) {
 /*****************************************************************************************************
  * Proficiency Progress Wrapper
  *****************************************************************************************************/
-#merlin-proficiency-progress-wrapper {
-    display: flex;
-    width: 100%;
-    max-height: 60vw;
+.merlin-proficiency-progress-wrapper {
+    grid-column: 1 / span 1;
+    max-height: 70vh;
+    overflow-y: scroll;
 }
 
-#merlin-proficiency-progress-group-selector-container  {
+.merlin-proficiency-progress-group-selector-container  {
     margin-right: 1rem;
-    width: 30%;
-    overflow-y: scroll;
 }
 
-#merlin-proficiency-progress-group-selector {
+.merlin-proficiency-progress-group-selector {
+    border: 1px solid black;
 }
 
-#merlin-proficiency-progress-table-container {
-    overflow-y: scroll;
+.merlin-proficiency-progress-table-container {
+    border: 1px solid black;
 }
 
-#merlin-proficiency-progress-table-div {
+.merlin-proficiency-progress-table-div {
 }
 
 

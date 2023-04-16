@@ -20,7 +20,7 @@
   <head>
     <link rel="stylesheet" href="merlin.css" />
     <script type="module">
-      import * as merlinProficiencyProgress from "./merlin-proficiency-progress.js";
+      import * as merlinProficiencyProgress from "./merlin-proficiency-progress.mjs";
       
       const urlParams = new URLSearchParams(window.location.search);
       const authenticatedUsername = urlParams.get('authenticatedUsernameInput');
@@ -61,45 +61,49 @@
       <input type="submit" value="Submit"/>
     </form>
 
-    <div id="merlin-proficiency-progress-wrapper">
-      <div id="merlin-proficiency-progress-group-selector-container">
-	<div id="merlin-proficiency-progress-group-selector">
-	  <h2>Groups Under My Authority</h2>
-	  <ul class="merlin-groups-tree" data-bind="template: {name: 'groupTemplate', foreach: groups}" id='merlin-groups-under-authority-tree'></ul>
-	  <script id="groupTemplate" type="text/html">
-              <!--ko if: children.length > 0-->
-                  <li>
-                      <details> 
-                          <summary><span data-bind="text: pathname"></span></summary>
-                          <ul data-bind="template: {name: 'groupTemplate', foreach: children}"></ul>
-                      </details>
-                  </li>
-              <!--/ko-->
-              <!--ko if: children.length == 0-->
-                  <li>
-                      <a href="javascript:;"><span class="merlin-groups-tree-group-leaf" data-bind="text: pathname, click: loadUsersInGroup;"></span></a>
-                      <ul data-bind="foreach: users">
-                          <li>
-                                  <a href="javascript:;" onClick="document.merlinHandlersLoadMasteryProgress(this);">
-                                  <span class="merlin-arguments">
-                                      <span data-bind="text: userName"></span>
-                                      <span data-bind="text: $parent.pathname"></span>
-                                  </span>
-                                  <span  class="merlin-groups-tree-user-leaf">
-                                      <span data-bind="text: firstName"></span><span>&nbsp;</span><span data-bind="text: lastName"></span>
-                                  </span>
-                              </a>
-                          </li>
-                      </ul>
-                  </li>
-              <!--/ko-->
-	  </script>
+    <div class="merlin-interactive-api-group">
+      <div class="merlin-interactive-api-status-header">
+      </div>
+      <div class="merlin-proficiency-progress-wrapper" id="merlin-proficiency-progress-wrapper">
+	<div class="merlin-proficiency-progress-group-selector-container" id="merlin-proficiency-progress-group-selector-container">
+	  <div class="merlin-proficiency-progress-group-selector" id="merlin-proficiency-progress-group-selector">
+	    <h2>Groups Under My Authority</h2>
+	    <ul class="merlin-groups-tree" data-bind="template: {name: 'groupTemplate', foreach: groups}" id='merlin-groups-under-authority-tree'></ul>
+	    <script id="groupTemplate" type="text/html">
+		<!--ko if: children.length > 0-->
+		    <li>
+			<details> 
+			    <summary><span data-bind="text: pathname"></span></summary>
+			    <ul data-bind="template: {name: 'groupTemplate', foreach: children}"></ul>
+			</details>
+		    </li>
+		<!--/ko-->
+		<!--ko if: children.length == 0-->
+		    <li>
+			<a href="javascript:;"><span class="merlin-groups-tree-group-leaf" data-bind="text: pathname, click: loadUsersInGroup;"></span></a>
+			<ul data-bind="foreach: users">
+			    <li>
+				    <a href="javascript:;" onClick="document.merlinHandlersLoadMasteryProgress(this);">
+				    <span class="merlin-arguments">
+					<span data-bind="text: userName"></span>
+					<span data-bind="text: $parent.pathname"></span>
+				    </span>
+				    <span  class="merlin-groups-tree-user-leaf">
+					<span data-bind="text: firstName"></span><span>&nbsp;</span><span data-bind="text: lastName"></span>
+				    </span>
+				</a>
+			    </li>
+			</ul>
+		    </li>
+		<!--/ko-->
+	    </script>
+	  </div>
 	</div>
       </div>
 
-      <div id="merlin-proficiency-progress-table-container">
-	<div id="merlin-proficiency-progress-table-div">
-    <h2 id="merlin-proficiency-progress-header">User Mastery Progress&nbsp;(<span data-bind="text: username"></span>)</h2>
+      <div class="merlin-proficiency-progress-table-container">
+	<div class="merlin-proficiency-progress-table-div">
+    <h2 id="merlin-proficiency-progress-header" class="merlin-proficiency-progress-header">User Mastery Progress&nbsp;(<span data-bind="text: username"></span>)</h2>
     <table id='merlin-proficiency-progress-table' class="merlin-proficiency-progress-table" style="display: none" data-bind="visible: true">
       <thead>
 	<tr>

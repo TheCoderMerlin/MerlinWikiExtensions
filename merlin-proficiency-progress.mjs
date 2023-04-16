@@ -13,10 +13,10 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *******************************************************************************************************/
-import * as merlinapi from "./merlin-api.js";
+import * as merlinapi from "./merlin-api.mjs";
 
 // Re-export needed functions
-export {setCredentials} from "./merlin-api.js";
+export {setCredentials} from "./merlin-api.mjs";
 
 /******************************************************************************************************
  * Global cache
